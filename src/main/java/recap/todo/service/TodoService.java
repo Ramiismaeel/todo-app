@@ -1,6 +1,8 @@
 package recap.todo.service;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import recap.todo.Todo;
 import recap.todo.TodoStatus;
 import recap.todo.dto.CreateTodoDto;
@@ -41,7 +43,7 @@ public class TodoService {
     public Todo updateTodo(String id, UpdateTodoDto dto)  {
 
         if(!todoRepo.existsById(id)) {
-            throw new RuntimeException("No such Todo with id: "+ id);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such Todo with id: " + id);
         }
         Todo targetTodo = Todo.builder()
                 .id(id)
