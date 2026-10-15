@@ -40,8 +40,8 @@ public class TodoService {
 
     public Todo updateTodo(String id, UpdateTodoDto dto)  {
 
-        if(todoRepo.findById(id).isEmpty()) {
-            throw new RuntimeException();
+        if(!todoRepo.existsById(id)) {
+            throw new RuntimeException("No such Todo with id: "+ id);
         }
         Todo targetTodo = Todo.builder()
                 .id(id)
@@ -52,7 +52,7 @@ public class TodoService {
     }
 
     public String deleteTodo(String id) {
-        if(todoRepo.findById(id).isEmpty()) {
+        if(!todoRepo.existsById(id)) {
             return "This Todo not exist";
         }
         todoRepo.deleteById(id);
