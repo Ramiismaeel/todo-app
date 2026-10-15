@@ -7,6 +7,7 @@ import recap.todo.dto.CreateTodoDto;
 import recap.todo.repo.TodoRepo;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class TodoService {
@@ -30,5 +31,9 @@ public class TodoService {
                 .status(TodoStatus.OPEN)
                 .build();
         return todoRepo.save(newTodo);
+    }
+
+    public Optional<Todo> getById(String id) {
+        return todoRepo.findById(id);
     }
 }

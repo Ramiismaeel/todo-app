@@ -6,6 +6,7 @@ import recap.todo.dto.CreateTodoDto;
 import recap.todo.service.TodoService;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/todo")
@@ -25,6 +26,10 @@ public class TodoController {
     @PostMapping
     public Todo create(@RequestBody CreateTodoDto dto) {
         return todoService.createTodo(dto);
+    }
 
+    @GetMapping("/{id}")
+    public Optional<Todo> getById(@PathVariable String id) {
+        return todoService.getById(id);
     }
 }
