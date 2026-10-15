@@ -50,4 +50,12 @@ public class TodoService {
                 .build();
         return todoRepo.save(targetTodo);
     }
+
+    public String deleteTodo(String id) {
+        if(todoRepo.findById(id).isEmpty()) {
+            return "This Todo not exist";
+        }
+        todoRepo.deleteById(id);
+        return "Deleted successfully";
+    }
 }
