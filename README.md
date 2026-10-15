@@ -6,63 +6,121 @@
 
 
 
-### Setup: Download frontend
-Today we will focus on the ToDo backend. Follow the steps to complete the task.
+A Spring Boot REST backend for a simple Kanban-style ToDo app. The React frontend (provided by neuefische) is served as static files by the backend, and todos are stored in MongoDB.
 
-#### Download the frontend
-Create a Spring Boot project in Intellij and add the necessary dependencies directly (e.g., Spring Web, Spring Data, Lombok, …)
-Copy the contents of frontend.zip into the following directory: src/main/resources/static
+## Tech Stack
 
+| Area | Technology |
+|---|---|
+| Language | Java 25 |
+| Framework | Spring Boot 4.1 (Web MVC) |
+| Database | MongoDB (Spring Data MongoDB) |
+| API docs | springdoc-openapi (Swagger UI) |
+| Boilerplate | Lombok |
+| Testing | JUnit, MockMvc, embedded MongoDB (Flapdoodle) |
+| CI | GitHub Actions (Maven build + tests) |
 
+## Getting Started
 
-Start the backend -> the frontend should now be visible at localhost:8080!
-### Research: Analyze accesses
-Use the developer tools in your browser (the “Network” tab) to analyze the accesses of the frontend. Which endpoints are being addressed (URLs and HTTP methods)? What data is being sent to the server?
+### Prerequisites
 
-### Coding: Develop backend
-Implement the HTTP endpoints that your frontend needs. Go through the endpoints step by step and also write tests for your methods.
+- JDK 25
+- Maven (or the Maven integration in IntelliJ)
+- A running MongoDB instance (local or Atlas)
 
-If you are unsure on which endpoint to program the next steps are containg hints
+### 1. Add the frontend
 
-#### Hint: 1. GET
-Provide a GET Endpoint at /api/todo, this endpoint should return all saved todos in a list.
+1. Download the [frontend](https://github.com/neuefische/java-todo-frontend/releases/download/v1.0.0/frontend.zip).
+2. Unzip it and copy its contents into `src/main/resources/static`.
 
-#### Hint: 2. POST
-Provide a POST Endpoint at /api/todo, this endpoint should accept a body with a todo-dto which contains the attributes: description and status. The description should be a String and the status should be an enum or a String.
+### 2. Configure MongoDB
 
-#### Hint: 3. GET By Id
-Provide a GET Endpoint at /api/todo/{id}, this endpoint should return a specific todo depending on the id provided as a Path-Variable.
+In `src/main/resources/application.properties`:
 
-#### Hint: 4. PUT
-Provide a PUT Endpoint at /api/todo/{id}, this endpoint should accept a body with a todo-dto and updates a already existing to depending on the Id given on the Path-Variable.
+```properties
+spring.mongodb.uri=YOUR_MONGODB_CONNECT_URL
+```
 
-#### Hint: 5. DELETE
-Provide a DELETE Endpoint at /api/todo/{id}, this endpoint should delete an existing depending on the Id given in the Path-Variable.
+### 3. Run the app
 
-#### Bonus: ENUM
-If your Order.status is a String, refactor you code and use an OrderStatus enum.
+```bash
+mvn spring-boot:run
+```
 
-#### Bonus: REST
-Research which Statuscode the POST Request should return when programming a REST API. And implement it!
+Then open:
 
-#### BONUS: REST
-Research which Statuscode the DELETE Request should return when programming a REST API. And implement it!
+- Frontend: http://localhost:8080
+- Swagger UI: http://localhost:8080/swagger-ui/index.html
 
-#### Bonus: Monitoring
-Add a current dependency to JavaMelody to your backend. Your backend should now display a dashboard at /monitoring that provides information about the performance of your backend.
+## Analysis: What the Frontend Calls
 
-Click around in the frontend a few times and check the metrics of your backend.
+Using the browser's developer tools (Network tab), these requests were found:
 
-Can you imagine a situation where monitoring your backend could be helpful?
+| Action in the UI | HTTP method | URL | Request body |
+|---|---|---|---|
+| Load all todos | `GET` | `/api/todo` | – |
+| Add a new todo | `POST` | `/api/todo` | `{ "description": "...", "status": "OPEN" }` |
+| Open details / edit page | `GET` | `/api/todo/{id}` | – |
+| Save edit / "Advance" button | `PUT` | `/api/todo/{id}` | `{ "id": "...", "description": "...", "status": "..." }` |
+| Delete (only in "Done") | `DELETE` | `/api/todo/{id}` | – |
 
-#### Bonus: Undo Endpoint
-Implement an HTTP endpoint in the backend at /undo that undoes the last change.
+## API Endpoints
 
-No adjustments are necessary in the frontend. Simply call the endpoint via Postman and check if the last change was undone.
+Base URL: `/api/todo`
 
-Write good integration tests for this endpoint.
+| Method | Endpoint | Description | Response |
+|---|---|---|---|
+| `GET` | `/api/todo` | Returns all todos | List of todos |
+| `POST` | `/api/todo` | Creates a new todo | The saved todo (with generated `id`) |
+| `GET` | `/api/todo/{id}` | Returns one todo by id | The todo, or **404** if not found |
+| `PUT` | `/api/todo/{id}` | Updates an existing todo | The updated todo, or **404** if not found |
+| `DELETE` | `/api/todo/{id}` | Deletes a todo | Empty response, or **404** if not found |
 
-It should also be possible to call the endpoint multiple times to undo multiple changes.
+### Todo model
 
-#### Bonus: Redo Endpoint
-Now, also write a /redo endpoint to undo a previous undo.
+```json
+{
+  "id": "6720f1c2a1b2c3d4e5f60789",
+  "description": "Write README",
+  "status": "OPEN"
+}
+```
+
+### Status enum
+
+| Value | Column in the frontend |
+|---|---|
+| `OPEN` | Todo |
+| `IN_PROGRESS` | Doing |
+| `DONE` | Done |
+
+The "Advance" button moves a todo `OPEN → IN_PROGRESS → DONE`.
+
+## Testing
+
+Tests use MockMvc for the controller layer and an embedded MongoDB (Flapdoodle), so no external database is needed.
+
+```bash
+mvn verify
+```
+
+The embedded MongoDB version is set in `src/test/resources/application.properties`:
+
+```properties
+de.flapdoodle.mongodb.embedded.version=7.0.4
+```
+
+## Continuous Integration
+
+Every push runs the GitHub Actions workflow `.github/workflows/maven.yml`, which builds the project with JDK 25 and runs all tests with `mvn -B verify`.
+
+## Project Structure
+
+```
+src/main/java/recap/todo
+├── controller   # REST controller (TodoController)
+├── service      # Business logic (TodoService)
+├── repository   # MongoDB repository (TodoRepo)
+└── model        # Todo, DTOs, Status enum
+src/main/resources/static   # React frontend build
+```
