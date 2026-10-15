@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import recap.todo.Todo;
 import recap.todo.TodoStatus;
 import recap.todo.dto.CreateTodoDto;
+import recap.todo.dto.UpdateTodoDto;
 import recap.todo.repo.TodoRepo;
 
 import java.util.List;
@@ -35,5 +36,18 @@ public class TodoService {
 
     public Optional<Todo> getById(String id) {
         return todoRepo.findById(id);
+    }
+
+    public Todo updateTodo(String id, UpdateTodoDto dto)  {
+
+        if(todoRepo.findById(id).isEmpty()) {
+            throw new RuntimeException();
+        }
+        Todo targetTodo = Todo.builder()
+                .id(id)
+                .description(dto.description())
+                .status(dto.status())
+                .build();
+        return todoRepo.save(targetTodo);
     }
 }
