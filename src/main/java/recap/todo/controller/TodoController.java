@@ -1,9 +1,8 @@
 package recap.todo.controller;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import recap.todo.Todo;
+import recap.todo.dto.CreateTodoDto;
 import recap.todo.service.TodoService;
 
 import java.util.List;
@@ -21,5 +20,11 @@ public class TodoController {
     @GetMapping
     public List<Todo> getAll() {
         return todoService.getAll();
+    }
+
+    @PostMapping
+    public Todo create(@RequestBody CreateTodoDto dto) {
+        return todoService.createTodo(dto);
+
     }
 }

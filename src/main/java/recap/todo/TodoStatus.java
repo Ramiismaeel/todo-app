@@ -1,7 +1,7 @@
 package recap.todo;
 
 public enum TodoStatus {
-    TODO,
-    DOING,
+    OPEN,
+    IN_PROGRESS,
     DONE
 }
